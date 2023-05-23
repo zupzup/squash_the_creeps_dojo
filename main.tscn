@@ -1,7 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://41v4y5kymvos"]
+[gd_scene load_steps=10 format=3 uid="uid://41v4y5kymvos"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_2f5qq"]
+[ext_resource type="PackedScene" uid="uid://0ix5ud2t3cgg" path="res://mob.tscn" id="2_3yx56"]
 [ext_resource type="Script" path="res://ScoreLabel.gd" id="2_miy5l"]
+[ext_resource type="PackedScene" uid="uid://c4hh2uoyxy6w0" path="res://player.tscn" id="3_ww3b7"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_t7sm3"]
 size = Vector3(100, 2, 100)
@@ -15,8 +17,16 @@ albedo_color = Color(1, 0.0784314, 1, 1)
 [sub_resource type="CylinderMesh" id="CylinderMesh_d464a"]
 material = SubResource("StandardMaterial3D_33wyd")
 
+[sub_resource type="Curve3D" id="Curve3D_14d2u"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -23.9248, 0, 24.2675, 0, 0, 0, 0, 0, 0, -23.9905, 0, -23.6437, 0, 0, 0, 0, 0, 0, 23.8551, 0, -24.0375, 0, 0, 0, 0, 0, 0, 23.8551, 0, 24.005, 0, 0, 0, 0, 0, 0, -23.9248, 0, 24.2675),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
+
 [node name="Main" type="Node"]
 script = ExtResource("1_2f5qq")
+mob_scene = ExtResource("2_3yx56")
 
 [node name="Floor" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
@@ -26,6 +36,7 @@ collision_layer = 4
 shape = SubResource("BoxShape3D_t7sm3")
 
 [node name="MeshInstance" type="MeshInstance3D" parent="Floor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.270691, -0.222473, -0.00939941)
 mesh = SubResource("BoxMesh_cbqoa")
 
 [node name="CameraPivot" type="Marker3D" parent="."]
@@ -56,10 +67,6 @@ mesh = SubResource("CylinderMesh_d464a")
 [node name="BottomRight" type="MeshInstance3D" parent="Cylinders"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 24)
 mesh = SubResource("CylinderMesh_d464a")
-
-[node name="SpawnTimer" type="Timer" parent="."]
-wait_time = 3.0
-autostart = true
 
 [node name="UserInterface" type="Control" parent="."]
 layout_mode = 3
@@ -111,4 +118,17 @@ grow_vertical = 2
 theme_override_font_sizes/font_size = 100
 text = "Press Enter to retry"
 
-[connection signal="timeout" from="SpawnTimer" to="." method="_on_spawn_timer_timeout"]
+[node name="Player" parent="." instance=ExtResource("3_ww3b7")]
+
+[node name="Path3D" type="Path3D" parent="."]
+curve = SubResource("Curve3D_14d2u")
+
+[node name="PathFollow3D" type="PathFollow3D" parent="Path3D"]
+transform = Transform3D(-0.999998, 0, -0.00136986, 0, 1, 0, 0.00136986, 0, -0.999998, -23.9248, 0, 24.2675)
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.5
+autostart = true
+
+[connection signal="hit" from="Player" to="." method="_on_player_hit"]
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
